@@ -7,7 +7,12 @@
         protected $name = "start";
         protected $description = "Start command to get started";
         public function handle(){
-            $this->replyWithMessage(['text'=>'Hello! welcome to Cowin vaccine tracker. Here are our available commands : ']);
+            $this->replyWithMessage(['text'=>'<b>bold</b>, <strong>bold</strong>
+            <i>italic</i>, <em>italic</em>
+            <a href="URL">inline URL</a>
+            <code>inline fixed-width code</code>
+            <pre>pre-formatted fixed-width code block</pre>',
+            'parse_mode'=>'HTML']);
             $this->replyWithChatAction(['action'=>Actions::TYPING]);
             $commands = $this->getTelegram()->getCommands();
             $response = "";
