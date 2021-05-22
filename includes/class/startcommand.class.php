@@ -8,7 +8,7 @@
         protected $description = "Start command to get started";
         public function handle(){
             $this->replyWithMessage(['text'=>'Click to Open [URL](https://www.google.com',
-            'parse_mode'=>'markdown']);
+            'parse_mode'=>'markdown','buttons'=>[['type'=>'postback','title'=>'hello','payload'=>'https://www.google.com']]]);
             $this->replyWithChatAction(['action'=>Actions::TYPING]);
             $commands = $this->getTelegram()->getCommands();
             $response = "";
