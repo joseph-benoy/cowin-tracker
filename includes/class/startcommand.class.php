@@ -7,8 +7,20 @@
         protected $name = "start";
         protected $description = "Start command to get started";
         public function handle(){
-            $this->replyWithMessage(['text'=>'Click to Open [URL](https://www.google.com',
-            'parse_mode'=>'markdown','buttons'=>[['type'=>'postback','title'=>'hello','payload'=>'https://www.google.com']]]);
+            $keyboard = [
+                ['7', '8', '9'],
+                ['4', '5', '6'],
+                ['1', '2', '3'],
+                     ['0']
+            ];
+            
+            $reply_markup = $this->replyKeyboardMarkup([
+                'keyboard' => $keyboard, 
+                'resize_keyboard' => true, 
+                'one_time_keyboard' => true
+            ]);
+            $this->replyWithMessage(['text'=>'Click to Open [URL](https://www.google.com) dfgfdgdf',
+            'parse_mode'=>'markdown']);
             $this->replyWithChatAction(['action'=>Actions::TYPING]);
             $commands = $this->getTelegram()->getCommands();
             $response = "";
