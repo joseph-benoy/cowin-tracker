@@ -3,31 +3,36 @@
 
     use Telegram\Bot\Actions;
     use Telegram\Bot\Commands\Command;
+    use Telegram\Bot\Keyboard\Keyboard;
+    use Telegram;
     class startCommand extends Command{
         protected $name = "start";
         protected $description = "Start command to get started";
         public function handle(){
-            $keyboard = [
-                ['7', '8', '9'],
-                ['4', '5', '6'],
-                ['1', '2', '3'],
-                     ['0']
-            ];
-            
-            $reply_markup = $this->replyKeyboardMarkup([
-                'keyboard' => $keyboard, 
-                'resize_keyboard' => true, 
-                'one_time_keyboard' => true
-            ]);
-            $this->replyWithMessage(['text'=>'Click to Open [URL](https://www.google.com) dfgfdgdf',
-            'parse_mode'=>'markdown']);
+            $this->replyWithMessage(['text'=>'
+            <b>Welcome to Cowin vaccine tracker!</b>
+            <code>We will help you notifying when vaccine is available within your district or pincode.Please choose appropriate options from the menu given below.</code>
+            <i>Please don\'t spam with random commands!</i>',
+            'parse_mode'=>'HTML']);
             $this->replyWithChatAction(['action'=>Actions::TYPING]);
-            $commands = $this->getTelegram()->getCommands();
-            $response = "";
-            foreach($commands as $name=>$command){
-                $response.=sprintf("/%s - %s".PHP_EOL,$name,$command->getDescription());
-            }
-            $this->replyWithMessage(['text'=>$response]);
+
+
+
+            $inlineLayout = [
+                [
+                    Keyboard::inlineButton(['text' => 'Test', 'callback_data' => 'data']),
+                    Keyboard::inlineButton(['text' => 'Btn 2', 'callback_data' => 'data_from_btn2'])
+                ]
+            ];
+    
+            $keyboard = Telegram::replyKeyboardMarkup([
+                'inline_keyboard' => $inlineLayout
+            ]);
+    
+            $this->replyWithMessage(['text' => 'Start command', 'reply_markup' => $keyboard]);
+
+
+
             $this->triggerCommand('subscribe');
         }
     }
