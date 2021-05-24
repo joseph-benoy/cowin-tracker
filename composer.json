@@ -1,5 +1,5 @@
 {
     "require": {
-        "telegram-bot/api": "^2.3"
+        "ext-apcu":"*"
     }
 }
