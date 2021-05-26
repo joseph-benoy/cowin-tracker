@@ -59,14 +59,21 @@
                 $this->mainMenu();
             }
             elseif($this->getText()=="List sessions by District"){
-                $this->ListByDistrict();
+                $this->listByDistrict();
             }
-        }
-        protected function getCommandSession($chatId){
-            if(apcu_exists($chatId)){
-                return apcu_fetch($chatId);
-            }else{
-                return "";
+            elseif($this->getText()=="List sessions by Pincode"){
+                $this->listByPincode();
+            }
+            else{
+                if(apcu_exists($this->getChatId())){
+                    $sessionObj = json_decode(apcu_fetch($this->getChatId()));
+                    $this->$sessionObj->methodName($sessionObj);
+                }
+                else{
+                    $backBtn = new ReplyKeyboard();
+                    $backBtn->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
+                    $this->replyMessage("*Invalid request!*\nPlease try again.","markdown",$backBtn->getMarkup());
+                }
             }
         }
         public function replyMessage($text,$parse_mode=null,$replyMarkup=null){
@@ -93,9 +100,9 @@
             }
             return $result;
         }
-        public function setCommandSession($sessionName){
+        public function setCommandSession($methodName,$sessionName){
             $obj = new \stdClass;
-            $obj->commandName = get_class($this);
+            $obj->methodName = $methodName;
             $obj->sessionName = $sessionName;
             if(!apcu_exists($this->getChatId())){
                 apcu_add($this->getChatId(),json_encode($obj));
@@ -125,7 +132,7 @@
             $result = $this->replyMessage("*Main menu*","markdown",$keyboardMarkup->getMarkup());
             error_log("##start command executed{$result}",0);
         }
-        public function ListByDistrict(){
+        public function listByDistrict(){
             $statesList = [];
             if(apcu_exists($this->getChatId()."statesList")){
                 $statesList = json_decode(apcu_fetch($this->getChatId()."statesList"),true);
@@ -141,6 +148,10 @@
             $listStateKeyboard->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
             $result = $this->replyMessage("*Choose your state*","markdown",$listStateKeyboard->getMarkup());
             error_log("##State list created {$result}",0);
+        }
+        public function listByPincode(){
+            $result = $this->replyMessage("*Enter the pincode to list the vaccine sessions*","markdown",null);
+            error_log("##Enter pincode message sent {$result}",0);
         }
     }
 ?> 
