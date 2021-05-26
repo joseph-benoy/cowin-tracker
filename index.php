@@ -3,9 +3,16 @@
     require_once("includes/telegram-bot-sdk/autoload.php");
     class start extends Telegram\Api\Command{
         public function handle($randomData=null,$commandSessionObj=null,$queryData=null){
+            $mainMenuFlag = false;
+            if($randomData=="Back to main menu"){
+                error_log("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",0);
+                $mainMenuFlag = true;
+            }
             $cowinObj = new Api\Cowin();
             $statesList = [];
-            $backBtnMarkup = new Telegram\component\ReplyKeyboard()->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]])->getMarkup();
+            $backBtn = new Telegram\component\ReplyKeyboard();
+            $backBtn->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
+            $backBtnMarkup = $backBtn->getMarkup();
             if(apcu_exists("state_list")){
                 $statesList = json_decode(apcu_fetch("state_list"),true);
             }
@@ -14,14 +21,19 @@
                 apcu_add("state_list",json_encode($statesList));
             }
             $districtList = [];
-            if($commandSessionObj==null){
+            if($commandSessionObj==null||$commandSessionObj->sessionName=="mainPageSession"){
                 $keyboardMarkup = new Telegram\component\ReplyKeyboard();
                 $keyboardMarkup->addRow([["text"=>"List sessions by District","callback_data"=>"List sessions by District"]]);
                 $keyboardMarkup->addRow([["text"=>"List sessions by Pincode","callback_data"=>"List sessions by Pincode"]]);
                 $keyboardMarkup->addRow([["text"=>"Add District to watchlist","callback_data"=>"Add district to watchlist"]]);
                 $keyboardMarkup->addRow([["text"=>"Add Pincode to watchlist","callback_data"=>"Add Pincode to watchlist"]]);
-                $result = $this->replyMessage("*Welcome to Cowin Tracker!*\n\nWe will help you updated with the availability of vaccine sessions within your district or your pincode area.\n\n*Choose appropriate option from the menu*\n_Please don't spam with random inputs_","markdown",$keyboardMarkup->getMarkup());
-                $this->setCommandSession("startSession");
+                if($mainMenuFlag){
+                    $result = $this->replyMessage("*Main Menu*","markdown",$keyboardMarkup->getMarkup());
+                }
+                else{
+                    $result = $this->replyMessage("*Welcome to Cowin Tracker!*\n\nWe will help you updated with the availability of vaccine sessions within your district or your pincode area.\n\n*Choose appropriate option from the menu*\n_Please don't spam with random inputs_","markdown",$keyboardMarkup->getMarkup());
+                }
+               $this->setCommandSession("startSession");
             }
             if($commandSessionObj->sessionName=="startSession"){
                 if($randomData==="List sessions by District"){
@@ -58,7 +70,8 @@
                         $message.=$sessionMessage;
                         $result = $this->replyMessage($message,"markdown",null);
                     }
-                    $this->replyMessage("*List finished!*\n*Go back to main menu for more options*","markdown",null);
+                    $result = $this->replyMessage("*List finished!*\n*Go back to main menu for more options*","markdown",$backBtnMarkup);
+                    $this->setCommandSession("mainPageSession");
                     error_log("%%%%%%%%%%%%%% {$result}",0);
                 }
                 else{
@@ -122,6 +135,8 @@
                         $message.=$sessionMessage;
                         $result = $this->replyMessage($message,"markdown",null);
                     }
+                    $result = $this->replyMessage("*List finished!*\n*Go back to main menu for more options*","markdown",$backBtnMarkup);
+                    $this->setCommandSession("mainPageSession");
                     error_log("%%%%%%%%%%%%%% {$result}",0);
                 }
             }
