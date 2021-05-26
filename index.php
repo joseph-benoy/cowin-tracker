@@ -43,17 +43,42 @@
                     }
                     if($stateExists){
                         error_log("@@@@@@@@@@@@@@@@@@@@@",0);
+                        if(apcu_exists($this->getChatId()."-state")){
+                            if(apcu_fetch($this->getChatId()."-state")!=$randomData){
+                                apcu_store($this->getChatId()."-state",$randomData);
+                            }
+                        }
+                        else{
+                            apcu_add($this->getChatId()."-state",$randomData);
+                        }
                         $listDistrictKeyboard = new Telegram\component\ReplyKeyboard();
                         $districtList = $cowinObj->get_districts($randomData);
                         foreach($districtList as $district){
                             $listDistrictKeyboard->addRow([["text"=>"{$district['district_name']}","callback_data"=>"{$district['district_name']}"]]);
                         }
                         $result = $this->replyMessage("*Choose your District*","markdown",$listDistrictKeyboard->getMarkup());
+                        $this->setCommandSession("inputDistrictSession");
                     }
                     else{
                         error_log("@@@@@@@@@@@@@###############@@@@@@@@",0);
                         //send error
                     }
+                }
+            }
+            if($commandSessionObj->sessionName=="inputDistrictSession"){
+                if($randomData!=null){
+                    $result = "";
+                    $state = "";
+                    if(apcu_exists($this->getChatId())){
+                        $state = apcu_fetch($this->getChatId()."-state");
+                    }
+                    $data = $cowinObj->get_calender_by_district($state,$randomData,date("d-m-Y"));
+                    $x = json_encode($data,JSON_PRETTY_PRINT);
+                    error_log(">>>>>>>>>>>>>>>>> {$x}",0);
+                    $center = $data[0];
+                    $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
+                    $result = $this->replyMessage($message,"markdown",null);
+                    error_log("%%%%%%%%%%%%%% {$result}",0);
                 }
             }
         }

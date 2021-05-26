@@ -30,26 +30,28 @@
 
 
         protected function replyMessage($text,$parseMode=null,$replyMarkup=null){
+            $result = "";
             if($parseMode==null){
                 if($replyMarkup!=null){
                     $data = array("chat_id"=>$this->getChatId(),"text"=>$text,"reply_markup"=>$replyMarkup);
-                    $this->sendReply('sendMessage',$data);
+                    $result = $this->sendReply('sendMessage',$data);
                 }
                 else{
                     $data = array("chat_id"=>$this->getChatId(),"text"=>$text);
-                    $this->sendReply('sendMessage',$data);
+                    $result = $this->sendReply('sendMessage',$data);
                 }
             }
             else{
                 if($replyMarkup!=null){
                     $data = array("chat_id"=>$this->getChatId(),"text"=>$text,"reply_markup"=>$replyMarkup,"parse_mode"=>$parseMode);
-                    $this->sendReply('sendMessage',$data);
+                    $result = $this->sendReply('sendMessage',$data);
                 }
                 else{
                     $data = array("chat_id"=>$this->getChatId(),"text"=>$text,"parse_mode"=>$parseMode);
-                    $this->sendReply('sendMessage',$data);
+                    $result = $this->sendReply('sendMessage',$data);
                 }
             }
+            return $result;
         }
         protected function replyPhoto($path,$caption=null,$replyMarkup=null){
             if($caption==null){

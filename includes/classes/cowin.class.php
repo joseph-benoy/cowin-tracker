@@ -136,7 +136,9 @@
         function get_calender_by_district($state,$district,$date){
             try{
                 $district_id = null;
-                foreach($this->get_districts($state) as $dist){
+                $districts = $this->get_districts($state);
+                $x = json_encode($districts,JSON_PRETTY_PRINT);
+                foreach($districts as $dist){
                     if($district==$dist['district_name']){
                         $district_id = $dist['district_id'];
                     }
