@@ -29,7 +29,7 @@
         function get_districts($state_name){
             try{
                 $state_id = null;
-                foreach(get_states() as $state){
+                foreach($this->get_states() as $state){
                     if($state_name==$state['state_name']){
                         $state_id = $state['state_id'];
                     }
@@ -81,7 +81,7 @@
         function get_sessions_by_district($state,$district,$date){
             try{
                 $district_id = null;
-                foreach(get_districts($state) as $dist){
+                foreach($this->get_districts($state) as $dist){
                     if($district==$dist['district_name']){
                         $district_id = $dist['district_id'];
                     }
@@ -136,7 +136,7 @@
         function get_calender_by_district($state,$district,$date){
             try{
                 $district_id = null;
-                foreach(get_districts($state) as $dist){
+                foreach($this->get_districts($state) as $dist){
                     if($district==$dist['district_name']){
                         $district_id = $dist['district_id'];
                     }

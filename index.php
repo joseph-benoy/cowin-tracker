@@ -3,6 +3,16 @@
     require_once("includes/telegram-bot-sdk/autoload.php");
     class start extends Telegram\Api\Command{
         public function handle($randomData=null,$commandSessionObj=null,$queryData=null){
+            $cowinObj = new Api\Cowin();
+            $statesList = [];
+            if(apcu_exists("state_list")){
+                $statesList = json_decode(apcu_fetch("state_list"),true);
+            }
+            else{
+                $statesList = $cowinObj->get_states();
+                apcu_add("state_list",json_encode($statesList));
+            }
+            $districtList = [];
             if($commandSessionObj==null){
                 $keyboardMarkup = new Telegram\component\ReplyKeyboard();
                 $keyboardMarkup->addRow([["text"=>"List sessions by District","callback_data"=>"List sessions by District"]]);
@@ -16,17 +26,35 @@
                 error_log("###################3",0);
                 if($randomData==="List sessions by District"){
                     $listStateKeyboard = new Telegram\component\ReplyKeyboard();
-                    $cowinObj = new Api\Cowin();
-                    foreach($cowinObj->get_states() as $state){
+                    foreach($statesList as $state){
                         $listStateKeyboard->addRow([["text"=>"{$state['state_name']}","callback_data"=>"{$state['state_name']}"]]);
                     }
                     $result = $this->replyMessage("*Choose your state*","markdown",$listStateKeyboard->getMarkup());
-                    error_log("### = {$result}",0);
                 }
                 $this->setCommandSession("inputStateSession");
             }
             if($commandSessionObj->sessionName=="inputStateSession"){
-                
+                if($randomData!=null){
+                    $stateExists = false;
+                    foreach($statesList as $state){
+                        if($state['state_name']==$randomData){
+                            $stateExists = true;
+                        }
+                    }
+                    if($stateExists){
+                        error_log("@@@@@@@@@@@@@@@@@@@@@",0);
+                        $listDistrictKeyboard = new Telegram\component\ReplyKeyboard();
+                        $districtList = $cowinObj->get_districts($randomData);
+                        foreach($districtList as $district){
+                            $listDistrictKeyboard->addRow([["text"=>"{$district['district_name']}","callback_data"=>"{$district['district_name']}"]]);
+                        }
+                        $result = $this->replyMessage("*Choose your District*","markdown",$listDistrictKeyboard->getMarkup());
+                    }
+                    else{
+                        error_log("@@@@@@@@@@@@@###############@@@@@@@@",0);
+                        //send error
+                    }
+                }
             }
         }
     }

@@ -93,7 +93,7 @@
             }
             else{
                 $sessionId = apcu_fetch($filterObj->chatId);
-                error_log("@@@@@@@@@@@@@@@@@ = {$sessionId}",0);
+                error_log("SSSSSSSSSSSSSSSSSs = {$sessionId}",0);
 //                $this->sendError($filterObj,"Invalid input");
             }
         }
@@ -121,6 +121,8 @@
         }
         protected function routeRandomInput($filterObj,$updateObj){
             $commandSessionObj = json_decode($this->getCommandSession($filterObj->chatId));
+            $sessionId = $commandSessionObj->sessionName;
+            error_log("SSSSSSSSSSSSSSSSSs = {$sessionId}",0);
             if($commandSessionObj!=""){
                 $class = $commandSessionObj->commandName;
                 $command = new $class($this->apiToken,$updateObj);
