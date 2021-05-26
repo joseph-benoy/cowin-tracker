@@ -56,6 +56,7 @@
                 }
             }
             elseif($this->getText()=="Back to main menu"){
+                $this->deleteCommandSession();
                 $this->mainMenu();
             }
             elseif($this->getText()=="List sessions by District"){
@@ -131,23 +132,36 @@
             $keyboardMarkup->addRow([["text"=>"Add District to watchlist","callback_data"=>"Add district to watchlist"]]);
             $keyboardMarkup->addRow([["text"=>"Add Pincode to watchlist","callback_data"=>"Add Pincode to watchlist"]]);
             $result = $this->replyMessage("*Main menu*","markdown",$keyboardMarkup->getMarkup());
-            error_log("##start command executed{$result}",0);
+            error_log("##Back to main menu{$result}",0);
         }
-        public function listByDistrict(){
-            $statesList = [];
-            if(apcu_exists($this->getChatId()."statesList")){
-                $statesList = json_decode(apcu_fetch($this->getChatId()."statesList"),true);
+        public function listByDistrict($sessionObj=null){
+            if($sessionObj==null){
+                $statesList = [];
+                if(apcu_exists($this->getChatId()."statesList")){
+                    $statesList = json_decode(apcu_fetch($this->getChatId()."statesList"),true);
+                }
+                else{
+                    $statesList = $this->cowin->get_states();
+                    apcu_add($this->getChatId()."statesList",json_encode($statesList));
+                }
+                $listStateKeyboard = new ReplyKeyboard();
+                foreach($statesList as $state){
+                    $listStateKeyboard->addRow([["text"=>"{$state['state_name']}","callback_data"=>"{$state['state_name']}"]]);
+                }
+                $listStateKeyboard->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
+                $result = $this->replyMessage("*Choose your state*","markdown",$listStateKeyboard->getMarkup());
+                $this->setCommandSession("listByDistrict","getStateName");
             }
-            else{
-                $statesList = $this->cowin->get_states();
-                apcu_add($this->getChatId()."statesList",json_encode($statesList));
+            elseif($sessionObj->sessionName=="getStateName"){
+                $stateName = $this->getText();
+                $data = $this->cowin->get_districts($stateName);
+                $listDistrictKeyboard = new ReplyKeyboard();
+                foreach($data as $district){
+                    $listDistrictKeyboard->addRow([["text"=>"{$district['district_name']}","callback_data"=>"{$district['district_name']}"]]);
+                }
+                $listDistrictKeyboard->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
+                $result = $this->replyMessage("*Choose your District*","markdown",$listDistrictKeyboard->getMarkup());
             }
-            $listStateKeyboard = new ReplyKeyboard();
-            foreach($statesList as $state){
-                $listStateKeyboard->addRow([["text"=>"{$state['state_name']}","callback_data"=>"{$state['state_name']}"]]);
-            }
-            $listStateKeyboard->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
-            $result = $this->replyMessage("*Choose your state*","markdown",$listStateKeyboard->getMarkup());
             error_log("##State list created {$result}",0);
         }
         public function listByPincode($sessionObj=null){
