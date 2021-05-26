@@ -119,7 +119,7 @@
                     }
                     $data = $cowinObj->get_calender_by_district($state,$randomData,date("d-m-Y"));
                     $x = json_encode($data,JSON_PRETTY_PRINT);
-                    error_log(">>>>>>>>>>>>>>>>> {$x}",0);
+                    error_log("~~~~~~~~{$x}",0);
                     foreach($data as $center){
                         $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
                         $sessionMessage = "";
