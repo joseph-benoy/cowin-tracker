@@ -60,7 +60,7 @@
                         $this->setCommandSession("inputDistrictSession");
                     }
                     else{
-                        error_log("@@@@@@@@@@@@@###############@@@@@@@@",0);
+                        error_log("@@@@@@@@@@@@@########State does not exits#######@@@@@@@@",0);
                         //send error
                     }
                 }
@@ -75,20 +75,21 @@
                     $data = $cowinObj->get_calender_by_district($state,$randomData,date("d-m-Y"));
                     $x = json_encode($data,JSON_PRETTY_PRINT);
                     error_log(">>>>>>>>>>>>>>>>> {$x}",0);
-                    $center = $data[0];
-                    $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
-                    $sessionMessage = "";
-                    $slots = "";
-                    foreach($center['sessions'] as $session){
-                        $sessionMessage .= "\n*Date : *{$session['date']}\n*Available capacity : *{$session['available_capacity']}\n*Minimum Age limit : *{$session['min_age_limit']}\n*Vaccine : *{$session['vaccine']}\n*Available capacity of dose 1 : *{$session['available_capacity_dose1']}\n*Available capacity of dose 2 : *{$session['available_capacity_dose2']}\n\n*Slots : *\n";
-                        foreach($session['slots'] as $slot){
-                            $slots .= "     {$slot}\n";
-                        }
-                        $sessionMessage.=$slots;
+                    foreach($data as $center){
+                        $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
+                        $sessionMessage = "";
                         $slots = "";
+                        foreach($center['sessions'] as $session){
+                            $sessionMessage .= "\n*Date : *{$session['date']}\n*Available capacity : *{$session['available_capacity']}\n*Minimum Age limit : *{$session['min_age_limit']}\n*Vaccine : *{$session['vaccine']}\n*Available capacity of dose 1 : *{$session['available_capacity_dose1']}\n*Available capacity of dose 2 : *{$session['available_capacity_dose2']}\n\n*Slots : *\n";
+                            foreach($session['slots'] as $slot){
+                                $slots .= "     {$slot}\n";
+                            }
+                            $sessionMessage.=$slots;
+                            $slots = "";
+                        }
+                        $message.=$sessionMessage;
+                        $result = $this->replyMessage($message,"markdown",null);
                     }
-                    $message.=$sessionMessage;
-                    $result = $this->replyMessage($message,"markdown",null);
                     error_log("%%%%%%%%%%%%%% {$result}",0);
                 }
             }
