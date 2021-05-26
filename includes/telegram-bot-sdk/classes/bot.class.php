@@ -92,7 +92,8 @@
                 $command->handle();
             }
             else{
-                error_log("@@@@@@@@@@@@@@@@@",0);
+                $sessionId = apcu_fetch($filterObj->chatId);
+                error_log("@@@@@@@@@@@@@@@@@ = {$sessionId}",0);
 //                $this->sendError($filterObj,"Invalid input");
             }
         }
