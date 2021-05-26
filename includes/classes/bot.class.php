@@ -162,22 +162,27 @@
                 if(is_numeric($pin)&&strlen($pin)==6){
                     $result = "";
                     $data = $this->cowin->get_calender_by_pin($this->getText(),date("d-m-Y"));
-                    foreach($data as $center){
-                        $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
-                        $sessionMessage = "";
-                        $slots = "";
-                        foreach($center['sessions'] as $session){
-                            $sessionMessage .= "\n*Date : *{$session['date']}\n*Available capacity : *{$session['available_capacity']}\n*Minimum Age limit : *{$session['min_age_limit']}\n*Vaccine : *{$session['vaccine']}\n*Available capacity of dose 1 : *{$session['available_capacity_dose1']}\n*Available capacity of dose 2 : *{$session['available_capacity_dose2']}\n\n*Slots : *\n";
-                            foreach($session['slots'] as $slot){
-                                $slots .= "     {$slot}\n";
-                            }
-                            $sessionMessage.=$slots;
-                            $slots = "";
-                        }
-                        $message.=$sessionMessage;
-                        $result = $this->replyMessage($message,"markdown",null);
+                    if(count($data)===0){
+                        $this->replyMessage("*Unfortunately no vaccine sesssions are available in this pincode area.*","markdown",null);
                     }
-                    $result = $this->replyMessage("*List finished!*\n*Please note that the sessions listed above are totally retrived from the official COWIN API. For more details visit official cowin website*\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
+                    else{
+                        foreach($data as $center){
+                            $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
+                            $sessionMessage = "";
+                            $slots = "";
+                            foreach($center['sessions'] as $session){
+                                $sessionMessage .= "\n*Date : *{$session['date']}\n*Available capacity : *{$session['available_capacity']}\n*Minimum Age limit : *{$session['min_age_limit']}\n*Vaccine : *{$session['vaccine']}\n*Available capacity of dose 1 : *{$session['available_capacity_dose1']}\n*Available capacity of dose 2 : *{$session['available_capacity_dose2']}\n\n*Slots : *\n";
+                                foreach($session['slots'] as $slot){
+                                    $slots .= "     {$slot}\n";
+                                }
+                                $sessionMessage.=$slots;
+                                $slots = "";
+                            }
+                            $message.=$sessionMessage;
+                            $result = $this->replyMessage($message,"markdown",null);
+                        }
+                    }
+                    $result = $this->replyMessage("*List finished!*\n*Please note that the information listed above is totally retrived from the official COWIN API. For more details visit official cowin website*\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
                     $this->deleteCommandSession();
                 }
                 else{
