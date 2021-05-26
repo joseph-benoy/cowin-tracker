@@ -5,6 +5,7 @@
         public function handle($randomData=null,$commandSessionObj=null,$queryData=null){
             $cowinObj = new Api\Cowin();
             $statesList = [];
+            $backBtnMarkup = new Telegram\component\ReplyKeyboard()->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]])->getMarkup();
             if(apcu_exists("state_list")){
                 $statesList = json_decode(apcu_fetch("state_list"),true);
             }
@@ -23,15 +24,46 @@
                 $this->setCommandSession("startSession");
             }
             if($commandSessionObj->sessionName=="startSession"){
-                error_log("###################3",0);
                 if($randomData==="List sessions by District"){
                     $listStateKeyboard = new Telegram\component\ReplyKeyboard();
                     foreach($statesList as $state){
                         $listStateKeyboard->addRow([["text"=>"{$state['state_name']}","callback_data"=>"{$state['state_name']}"]]);
                     }
                     $result = $this->replyMessage("*Choose your state*","markdown",$listStateKeyboard->getMarkup());
+                    $this->setCommandSession("inputStateSession");
                 }
-                $this->setCommandSession("inputStateSession");
+                if($randomData==="List sessions by Pincode"){
+                    $result = $this->replyMessage("*Enter the pincode for which you want to list the sessions*","markdown",null);
+                    $this->setCommandSession("inputPincodeSession");
+                }
+            }
+            if($commandSessionObj->sessionName=="inputPincodeSession"){
+                if(is_numeric($randomData)&&strlen($randomData)==6){
+                    $result = "";
+                    $data = $cowinObj->get_calender_by_pin($randomData,date("d-m-Y"));
+                    $x = json_encode($data,JSON_PRETTY_PRINT);
+                    error_log("~~~~~~~~{$x}",0);
+                    foreach($data as $center){
+                        $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
+                        $sessionMessage = "";
+                        $slots = "";
+                        foreach($center['sessions'] as $session){
+                            $sessionMessage .= "\n*Date : *{$session['date']}\n*Available capacity : *{$session['available_capacity']}\n*Minimum Age limit : *{$session['min_age_limit']}\n*Vaccine : *{$session['vaccine']}\n*Available capacity of dose 1 : *{$session['available_capacity_dose1']}\n*Available capacity of dose 2 : *{$session['available_capacity_dose2']}\n\n*Slots : *\n";
+                            foreach($session['slots'] as $slot){
+                                $slots .= "     {$slot}\n";
+                            }
+                            $sessionMessage.=$slots;
+                            $slots = "";
+                        }
+                        $message.=$sessionMessage;
+                        $result = $this->replyMessage($message,"markdown",null);
+                    }
+                    $this->replyMessage("*List finished!*\n*Go back to main menu for more options*","markdown",null);
+                    error_log("%%%%%%%%%%%%%% {$result}",0);
+                }
+                else{
+                    //send invalid pincode
+                }
             }
             if($commandSessionObj->sessionName=="inputStateSession"){
                 if($randomData!=null){
