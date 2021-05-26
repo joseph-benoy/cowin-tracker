@@ -2,8 +2,10 @@
     class Bot{
         public $apiToken;
         public $updateObj;
+        public $cowin;
         public function __construct($token){
             $this->apiToken = $token;
+            $this->cowin = new Cowin();
         }
         public function sendReply($method,$data){
             $url = "https://api.telegram.org/bot".$this->apiToken. "/" . $method;
@@ -49,15 +51,15 @@
         public function capture():void{
             $this->updateObj = json_decode(file_get_contents("php://input"));
             if($this->isCommand($this->getText())){
-                if($this->getText()==="/start"){
+                if($this->getText()=="/start"){
                     $this->startCommand();
                 }
-                elseif($this->getText()==="Bact to main menu"){
-                    $this->mainMenu();
-                }
-                elseif($this->getText()==="List sessions by District"){
-                    $this->ListByDistrict();
-                }
+            }
+            elseif($this->getText()=="Back to main menu"){
+                $this->mainMenu();
+            }
+            elseif($this->getText()=="List sessions by District"){
+                $this->ListByDistrict();
             }
         }
         protected function getCommandSession($chatId){
@@ -124,7 +126,21 @@
             error_log("##start command executed{$result}",0);
         }
         public function ListByDistrict(){
-            
+            $statesList = [];
+            if(apcu_exists($this->getChatId()."statesList")){
+                $statesList = json_decode(apcu_fetch($this->getChatId()."statesList"),true);
+            }
+            else{
+                $statesList = $this->cowin->get_states();
+                apcu_add($this->getChatId()."statesList",json_encode($statesList));
+            }
+            $listStateKeyboard = new ReplyKeyboard();
+            foreach($statesList as $state){
+                $listStateKeyboard->addRow([["text"=>"{$state['state_name']}","callback_data"=>"{$state['state_name']}"]]);
+            }
+            $listStateKeyboard->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
+            $result = $this->replyMessage("*Choose your state*","markdown",$listStateKeyboard->getMarkup());
+            error_log("##State list created {$result}",0);
         }
     }
 ?> 
