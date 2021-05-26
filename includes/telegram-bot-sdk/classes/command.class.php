@@ -29,14 +29,26 @@
         //reply functions
 
 
-        protected function replyMessage($text,$replyMarkup=null){
-            if($replyMarkup!=null){
-                $data = array("chat_id"=>$this->getChatId(),"text"=>$text,"reply_markup"=>$replyMarkup);
-                $this->sendReply('sendMessage',$data);
+        protected function replyMessage($text,$parseMode=null,$replyMarkup=null){
+            if($parseMode==null){
+                if($replyMarkup!=null){
+                    $data = array("chat_id"=>$this->getChatId(),"text"=>$text,"reply_markup"=>$replyMarkup);
+                    $this->sendReply('sendMessage',$data);
+                }
+                else{
+                    $data = array("chat_id"=>$this->getChatId(),"text"=>$text);
+                    $this->sendReply('sendMessage',$data);
+                }
             }
             else{
-                $data = array("chat_id"=>$this->getChatId(),"text"=>$text);
-                $this->sendReply('sendMessage',$data);
+                if($replyMarkup!=null){
+                    $data = array("chat_id"=>$this->getChatId(),"text"=>$text,"reply_markup"=>$replyMarkup,"parse_mode"=>$parseMode);
+                    $this->sendReply('sendMessage',$data);
+                }
+                else{
+                    $data = array("chat_id"=>$this->getChatId(),"text"=>$text,"parse_mode"=>$parseMode);
+                    $this->sendReply('sendMessage',$data);
+                }
             }
         }
         protected function replyPhoto($path,$caption=null,$replyMarkup=null){
