@@ -1,5 +1,6 @@
 {
 	  "require": {
-    "ext-apcu": "*"
+    "ext-apcu": "*",
+    "ext-curl":"*"
   	}
 }
