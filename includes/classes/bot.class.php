@@ -67,7 +67,8 @@
             else{
                 if(apcu_exists($this->getChatId())){
                     $sessionObj = json_decode(apcu_fetch($this->getChatId()));
-                    $this->$sessionObj->methodName($sessionObj);
+                    $methodName = $sessionObj->methodName;
+                    $this->$methodName($sessionObj);
                 }
                 else{
                     $backBtn = new ReplyKeyboard();
@@ -149,8 +150,42 @@
             $result = $this->replyMessage("*Choose your state*","markdown",$listStateKeyboard->getMarkup());
             error_log("##State list created {$result}",0);
         }
-        public function listByPincode(){
-            $result = $this->replyMessage("*Enter the pincode to list the vaccine sessions*","markdown",null);
+        public function listByPincode($sessionObj=null){
+            if($sessionObj==null){
+                $result = $this->replyMessage("*Enter the pincode to list the vaccine sessions*","markdown",null);
+                $this->setCommandSession("listByPincode","getPincode");
+            }
+            elseif($sessionObj->sessionName=="getPincode"){
+                $pin = $this->getText();
+                $backBtn = new ReplyKeyboard();
+                $backBtn->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
+                if(is_numeric($pin)&&strlen($pin)==6){
+                    $result = "";
+                    $data = $this->cowin->get_calender_by_pin($this->getText(),date("d-m-Y"));
+                    foreach($data as $center){
+                        $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
+                        $sessionMessage = "";
+                        $slots = "";
+                        foreach($center['sessions'] as $session){
+                            $sessionMessage .= "\n*Date : *{$session['date']}\n*Available capacity : *{$session['available_capacity']}\n*Minimum Age limit : *{$session['min_age_limit']}\n*Vaccine : *{$session['vaccine']}\n*Available capacity of dose 1 : *{$session['available_capacity_dose1']}\n*Available capacity of dose 2 : *{$session['available_capacity_dose2']}\n\n*Slots : *\n";
+                            foreach($session['slots'] as $slot){
+                                $slots .= "     {$slot}\n";
+                            }
+                            $sessionMessage.=$slots;
+                            $slots = "";
+                        }
+                        $message.=$sessionMessage;
+                        $result = $this->replyMessage($message,"markdown",null);
+                    }
+                    $result = $this->replyMessage("*List finished!*\n*Please note that the sessions listed above are totally retrived from the official COWIN API. For more details visit official cowin website*\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
+                    $this->deleteCommandSession();
+                }
+                else{
+                    //send invalid pincode
+                    $this->replyMessage("*Invalid pincode!*\nPlease try again.","markdown",$backBtn->getMarkup());
+                    $this->deleteCommandSession();
+                }
+            }
             error_log("##Enter pincode message sent {$result}",0);
         }
     }
