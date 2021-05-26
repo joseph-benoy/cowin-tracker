@@ -1,7 +1,6 @@
 <?php
-    class ReplyKeyboard{
-        public $oneTimeKeyboard = true;
-        public $resizeKeyboard = true;
+    class InlineKeyboard{
+        public $forceReply = true;
         public $keyboard = array();
         public function addRow($row){
             array_push($this->keyboard,$row);
@@ -9,9 +8,8 @@
         public function getMarkup(){
             return json_encode(
                 array(
-                    "keyboard"=>$this->keyboard,
-                    "resize_keyboard"=>$this->resizeKeyboard,
-                    "one_time_keyboard"=>$this->oneTimeKeyboard
+                    'inline_keyboard'=>$this->keyboard,
+                    'force_reply'=>$this->forceReply
                 )
             );
         }
