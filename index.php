@@ -20,6 +20,8 @@
                 $statesList = $cowinObj->get_states();
                 apcu_add("state_list",json_encode($statesList));
             }
+            $z = json_encode($statesList,JSON_PRETTY_PRINT);
+            error_log("~~~~~~~~~~~~~~~~~~~~~{$z}",0);
             $districtList = [];
             if($commandSessionObj==null||$commandSessionObj->sessionName=="mainPageSession"){
                 $keyboardMarkup = new Telegram\component\ReplyKeyboard();
