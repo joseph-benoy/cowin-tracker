@@ -77,6 +77,17 @@
                     error_log(">>>>>>>>>>>>>>>>> {$x}",0);
                     $center = $data[0];
                     $message = "*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
+                    $sessionMessage = "";
+                    $slots = "";
+                    foreach($center['sessions'] as $session){
+                        $sessionMessage .= "\n*Date : *{$session['date']}\n*Available capacity : *{$session['available_capacity']}\n*Minimum Age limit : *{$session['min_age_limit']}\n*Vaccine : *{$session['vaccine']}\n*Available capacity of dose 1 : *{$session['available_capacity_dose1']}\n*Available capacity of dose 2 : *{$session['available_capacity_dose2']}\n\n*Slots : *\n";
+                        foreach($session['slots'] as $slot){
+                            $slots .= "     {$slot}\n";
+                        }
+                        $sessionMessage.=$slots;
+                        $slots = "";
+                    }
+                    $message.=$sessionMessage;
                     $result = $this->replyMessage($message,"markdown",null);
                     error_log("%%%%%%%%%%%%%% {$result}",0);
                 }
