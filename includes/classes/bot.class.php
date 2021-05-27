@@ -252,11 +252,12 @@
             error_log("##Enter pincode message sent {$result}",0);
         }
         public function addPinWatch($sessionObj=null){
+            $result = "";
             if($sessionObj==null){
                 $result = $this->replyMessage("*Enter the pincode to list the vaccine sessions*","markdown",null);
                 $this->setCommandSession("addPinWatch","getPincode");
             }
-            elseif($sessionObj->sessionName=="addPinWatch"){
+            elseif($sessionObj->sessionName=="getPincode"){
                 $pin = $this->getText();
                 $backBtn = new ReplyKeyboard();
                 $backBtn->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
