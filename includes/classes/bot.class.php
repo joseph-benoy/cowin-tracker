@@ -65,6 +65,9 @@
             elseif($this->getText()=="List sessions by Pincode"){
                 $this->listByPincode();
             }
+            elseif($this->getText()=="Add Pincode to watchlist"){
+                $this->addPinWatch();
+            }
             else{
                 if(apcu_exists($this->getChatId())){
                     $sessionObj = json_decode(apcu_fetch($this->getChatId()));
@@ -120,7 +123,6 @@
             $keyboardMarkup = new ReplyKeyboard();
             $keyboardMarkup->addRow(array(array("text"=>"List sessions by District","callback_data"=>"List sessions by District")));
             $keyboardMarkup->addRow([["text"=>"List sessions by Pincode","callback_data"=>"List sessions by Pincode"]]);
-            $keyboardMarkup->addRow([["text"=>"Add District to watchlist","callback_data"=>"Add district to watchlist"]]);
             $keyboardMarkup->addRow([["text"=>"Add Pincode to watchlist","callback_data"=>"Add Pincode to watchlist"]]);
             $result = $this->replyMessage("*Hello {$this->getFullname()}!*\nWelcome to Cowin Tracker! We will help you updated with the availability of vaccine sessions within your district or your pincode area.\n\n*Choose appropriate option from the menu*\n_Please don't spam with random inputs_","markdown",$keyboardMarkup->getMarkup());
             error_log("##start command executed{$result}",0);
@@ -129,7 +131,6 @@
             $keyboardMarkup = new ReplyKeyboard();
             $keyboardMarkup->addRow(array(array("text"=>"List sessions by District","callback_data"=>"List sessions by District")));
             $keyboardMarkup->addRow([["text"=>"List sessions by Pincode","callback_data"=>"List sessions by Pincode"]]);
-            $keyboardMarkup->addRow([["text"=>"Add District to watchlist","callback_data"=>"Add district to watchlist"]]);
             $keyboardMarkup->addRow([["text"=>"Add Pincode to watchlist","callback_data"=>"Add Pincode to watchlist"]]);
             $result = $this->replyMessage("*Main menu*","markdown",$keyboardMarkup->getMarkup());
             error_log("##Back to main menu{$result}",0);
@@ -240,6 +241,35 @@
                         }
                     }
                     $result = $this->replyMessage("*List finished!*\n*Please note that the information listed above is totally retrived from the official COWIN API. For more details visit official cowin website*\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
+                    $this->deleteCommandSession();
+                }
+                else{
+                    //send invalid pincode
+                    $this->replyMessage("*Invalid pincode!*\nPlease try again.","markdown",$backBtn->getMarkup());
+                    $this->deleteCommandSession();
+                }
+            }
+            error_log("##Enter pincode message sent {$result}",0);
+        }
+        public function addPinWatch($sessionObj=null){
+            if($sessionObj==null){
+                $result = $this->replyMessage("*Enter the pincode to list the vaccine sessions*","markdown",null);
+                $this->setCommandSession("addPinWatch","getPincode");
+            }
+            elseif($sessionObj->sessionName=="addPinWatch"){
+                $pin = $this->getText();
+                $backBtn = new ReplyKeyboard();
+                $backBtn->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
+                if(is_numeric($pin)&&strlen($pin)==6){
+                    $result = "";
+                    $connection = new PDO("mysql:host=localhost;dbname=cowin_tracker", "joseph", "3057");
+                    $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    $statement = $connection->prepare("INSERT INTO PIN_WATCHLIST VALUES(:chatId,:pin)");
+                    $chatId = $this->getChatId();
+                    $statement->bindParam(":chatId",$chatId);
+                    $statement->bindParam(":pin",$pin);
+                    $statement->execute();
+                    $result = $this->replyMessage("*PIN {$pin} is added to the watch list!*\nWe will update you whenever there are vaccination sessions avaialable in {$pin}.\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
                     $this->deleteCommandSession();
                 }
                 else{
