@@ -95,9 +95,10 @@
                     $statement->execute();
                 }
                 else{
-                    $statement = $connection->prepare("UPDATE CENTER_LIST SET availability=:availability WHERE pin=:pin");
+                    $centerId = $center['center_id'];
+                    $statement = $connection->prepare("UPDATE CENTER_LIST SET availability=:availability WHERE centerId=:centerId");
                     $statement->bindParam(":availability",$availablity);
-                    $statement->bindParam(":pin",$pin);
+                    $statement->bindParam(":centerId",$centerId);
                     $statement->execute();
                 }
             }
