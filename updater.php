@@ -5,7 +5,13 @@
         $obj->availablity = 0;
         $obj->insert = false;
         foreach($center['sessions'] as $session){
-            $obj->availablity +=(int)$session['available_capacity'];
+            if($session['available_capacity']!=0){
+                $obj->availablity += $session['available_capacity'];
+            }
+        }
+        if(count($centerArray)==0){
+            $obj->insert = true;
+            return $obj;
         }
         if(!in_array($center['center_id'],array_column($centerArray,"centerId"))){
             $obj->insert = true;
@@ -13,7 +19,7 @@
         }
         else{
             foreach($centerArray as $centerObj){
-                if($centerObj['centerId']==$center['center_id']&&$centerObj['availability']!=$availablity){
+                if($centerObj['centerId']==$center['center_id']&&$centerObj['availability']!=$obj->availablity){
                     return $obj;
                 }
             }
@@ -25,7 +31,6 @@
     $bot = new Bot("1755386616:AAFH3PIzoumgJn1nOEy-i_YV8evDUUWq0qk");
     //cowin api object
     $cowin = new Cowin();
-
     //initiating db connection
     $connection = new PDO("mysql:host=localhost;dbname=cowin_tracker", "joseph", "3057");
     $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -42,21 +47,17 @@
 
     //selecting distinct pincode
     $pinList = array_unique(array_column($pinChatArray,"pin"));
-
     //looping through each distinct pincode
     foreach($pinList as $pin){
         //getting vaccine data from api
         $vaccineData = $cowin->get_calender_by_pin($pin,date("d-m-Y"));
-
         //loopin over each center
         foreach($vaccineData as $center){
 
             //check whether availability changed in a center
             $flagObj = sendFlag($centerArray,$center);
-
             //if changed
             if($flagObj->availablity!=0){
-
                 //message construction for sending
                 $message = "*VACCINE UPDATE!*\n\n*Center name* : {$center['name']}\n*Address : *{$center['address']}\n*Fee type : *{$center['fee_type']}\n";
                 $sessionMessage = "";
@@ -70,7 +71,6 @@
                     $slots = "";
                 }
                 $message.=$sessionMessage;
-
                 //gettting chat id list with the pincode
                 $chatIdList = [];
                 foreach($pinChatArray as $pinChat){

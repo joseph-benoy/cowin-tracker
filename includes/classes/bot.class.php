@@ -263,14 +263,29 @@
                 $backBtn->addRow([["text"=>"Back to main menu","callback_data"=>"Back to main menu"]]);
                 if(is_numeric($pin)&&strlen($pin)==6){
                     $result = "";
-                    $connection = new PDO("mysql:host=localhost;dbname=cowin_tracker", "joseph", "3057");
-                    $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                    $statement = $connection->prepare("INSERT INTO PIN_WATCHLIST VALUES(:chatId,:pin)");
-                    $chatId = $this->getChatId();
-                    $statement->bindParam(":chatId",$chatId);
-                    $statement->bindParam(":pin",$pin);
-                    $statement->execute();
-                    $result = $this->replyMessage("*PIN {$pin} is added to the watch list!*\nWe will update you whenever there are vaccination sessions avaialable in {$pin}.\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
+                    try{
+                        $connection = new PDO("mysql:host=localhost;dbname=cowin_tracker", "joseph", "3057");
+                        $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                        $statement = $connection->prepare("SELECT chatId FROM PIN_WATCHLIST WHERE chatId=:chatId");
+                        $chatId = $this->getChatId();
+                        $statement->bindParam(":chatId",$chatId);
+                        $statement->execute();
+                        $idFlag = $statement->fetch(PDO::FETCH_ASSOC)['chatId'];
+                        if($chatId==$idFlag){
+                            $result = $this->replyMessage("*Sorry! You have already added a PIN to watchlist.*\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
+                        }
+                        //insert into watch list
+                        else{
+                            $statement = $connection->prepare("INSERT INTO PIN_WATCHLIST VALUES(:chatId,:pin)");
+                            $statement->bindParam(":chatId",$chatId);
+                            $statement->bindParam(":pin",$pin);
+                            $statement->execute();
+                            $result = $this->replyMessage("*PIN {$pin} is added to the watch list!*\nWe will update you whenever there are vaccination sessions avaialable in {$pin}.\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
+                        }
+                    }
+                    catch(Exception $e){
+                        $result = $this->replyMessage("*Something went wrong!*\n_Go back to main menu for more options_","markdown",$backBtn->getMarkup());
+                    }
                     $this->deleteCommandSession();
                 }
                 else{
