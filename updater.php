@@ -81,7 +81,7 @@
 
                 //sending message to each chat id
                 foreach($chatIdList as $chatId){
-                    $result = $bot->sendVaccineUpdate($chatId,$message);
+                    $result = $bot->sendVaccineUpdate($chatId,$message,"markdown",null);
                 }
                 $availablity = $flagObj->availablity;
 

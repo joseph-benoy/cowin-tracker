@@ -281,5 +281,29 @@
             }
             error_log("##Enter pincode message sent {$result}",0);
         }
+        public function sendVaccineUpdate($chatId,$text,$parse_mode=null,$replyMarkup=null){
+            $result = "";
+            if($parse_mode!=null){
+                if($replyMarkup!=null){
+                    $data = array("chat_id"=>$chatId,"text"=>$text,"parse_mode"=>$parse_mode,"reply_markup"=>$replyMarkup);
+                    $result = $this->sendReply('sendMessage',$data);
+                }
+                else{
+                    $data = array("chat_id"=>$chatId,"text"=>$text,"parse_mode"=>$parse_mode);
+                    $result = $this->sendReply('sendMessage',$data);
+                }
+            }
+            else{
+                if($replyMarkup!=null){
+                    $data = array("chat_id"=>$chatId,"text"=>$text,"reply_markup"=>$replyMarkup);
+                    $result = $this->sendReply('sendMessage',$data);
+                }
+                else{
+                    $data = array("chat_id"=>$chatId,"text"=>$text);
+                    $result = $this->sendReply('sendMessage',$data);
+                }
+            }
+            return $result;
+        }
     }
 ?> 
