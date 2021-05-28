@@ -34,7 +34,7 @@
             return $this->updateObj->message->text;
         }
         public function getUsername(){
-            return $this->updateObj->from->username;
+            return $this->updateObj->message->from->username;
         }
         public function getFullname(){
             return  $this->updateObj->message->from->first_name." ".$this->updateObj->message->from->last_name;
@@ -125,6 +125,21 @@
             $keyboardMarkup->addRow([["text"=>"List sessions by Pincode","callback_data"=>"List sessions by Pincode"]]);
             $keyboardMarkup->addRow([["text"=>"Add Pincode to watchlist","callback_data"=>"Add Pincode to watchlist"]]);
             $result = $this->replyMessage("*Hello {$this->getFullname()}!*\nWelcome to Cowin Tracker! We will help you updated with the availability of vaccine sessions within your district or your pincode area.\n\n*Choose appropriate option from the menu*\n_Please don't spam with random inputs_","markdown",$keyboardMarkup->getMarkup());
+            try{
+                $connection = new PDO("mysql:host=localhost;dbname=cowin_tracker", "joseph", "3057");
+                $connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $statement = $connection->prepare("INSERT INTO USER values(:chatId,:fullname,:username)");
+                $chatId = $this->getChatId();
+                $fullname = $this->getFullname();
+                $username = $this->getUsername();
+                $statement->bindParam(":chatId",$chatId);
+                $statement->bindParam(":fullname",$fullname);
+                $statement->bindParam(":username",$username);
+                $statement->execute();
+            }
+            catch(Exception $e){
+                error_log("Db error : {$e->getMessage()}",0);
+            }
             error_log("##start command executed{$result}",0);
         }
         public function mainMenu(){
